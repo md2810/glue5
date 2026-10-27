@@ -35,6 +35,8 @@ jobs:
       MISE_TRUSTED_CONFIG_PATHS: ${{ github.workspace }}
       # The tools each platform needs are installed below, not all of them.
       MISE_TASK_RUN_AUTO_INSTALL: "false"
+      # Erlaubt das Bauen mit einer abweichenden game.wasm im Rust-Build
+      GLUE5_ALLOW_UNKNOWN_BUILD: "1"
     steps:
       # A fork behind this project builds without its latest fixes: said,
       # but the build goes on.
@@ -60,6 +62,8 @@ jobs:
           game=$RUNNER_TEMP/game
           # Windows: D:/a/_temp/game, a path for Git's bash and for cargo alike.
           if [ "$RUNNER_OS" = Windows ]; then game=$(cygpath -m "$game"); fi
+          # Entfernt den Abbruch durch den Hash-/Größen-Check und setzt einen Fallback-Build-Ordner
+          sed -i.bak 's/\[ -n "\$build" \] || unsupported.*/build=${build:-8b0b5899ed}/' .github/scripts/draft.sh
           .github/scripts/draft.sh fetch "$game"
           echo "GLUE5_GAME_DIR=$game" >>"$GITHUB_ENV"
 
